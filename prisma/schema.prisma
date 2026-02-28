@@ -1,0 +1,596 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Authentication Models
+// ============================================
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String
+  username           String    @unique
+  displayName        String?
+  bio                String?
+  avatar             String?
+  banner             String?
+  location           String?
+  website            String?
+  birthDate          DateTime?
+  verified           Boolean   @default(false)
+  verifiedAt         DateTime?
+  verificationStatus String    @default("none") // none, pending, approved, rejected
+  isPrivate          Boolean   @default(false)
+  role               String    @default("user") // user, moderator, admin
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  tweets             Tweet[]
+  likes              Like[]
+  retweets           Retweet[]
+  bookmarks          Bookmark[]
+  followers          Follow[]       @relation("UserFollowers")
+  following          Follow[]       @relation("UserFollowing")
+  blocked            Block[]        @relation("UserBlocked")
+  blockedBy          Block[]        @relation("UserBlockedBy")
+  muted              Mute[]         @relation("UserMuted")
+  mutedBy            Mute[]         @relation("UserMutedBy")
+  notifications      Notification[] @relation("UserNotifications")
+  notificationsActor Notification[] @relation("UserActor")
+  sentMessages       DirectMessage[] @relation("MessageSender")
+  receivedMessages   DirectMessage[] @relation("MessageRecipient")
+  conversations1     Conversation[] @relation("ConversationParticipant1")
+  conversations2     Conversation[] @relation("ConversationParticipant2")
+  lists              List[]
+  listMembers        ListMember[]
+  ownedCommunities   Community[]
+  communityMembers   CommunityMember[]
+  settings           UserSettings?
+  verification       Verification?
+  sessions           Session[]
+  reports            Report[]       @relation("UserReports")
+  reportsMade        Report[]       @relation("UserReporter")
+  reportsReviewed    Report[]       @relation("UserReviewer")
+  suspensions        Suspension[]   @relation("UserSuspended")
+  suspensionsMade    Suspension[]   @relation("UserSuspendedBy")
+  auditLogsActor     AuditLog[]     @relation("AuditLogActor")
+
+  @@index([email])
+  @@index([username])
+  @@index([createdAt])
+  @@index([role])
+}
+
+model UserSettings {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  // Appearance
+  darkMode             Boolean  @default(false)
+  theme               String    @default("system") // light, dark, system
+  fontSize            String    @default("medium") // small, medium, large
+  displayLanguage     String    @default("en")
+  // Notifications
+  notificationsEnabled Boolean  @default(true)
+  emailNotifications   Boolean  @default(true)
+  pushNotifications    Boolean  @default(true)
+  notifyLikes         Boolean  @default(true)
+  notifyRetweets      Boolean  @default(true)
+  notifyFollows       Boolean  @default(true)
+  notifyMentions      Boolean  @default(true)
+  notifyReplies       Boolean  @default(true)
+  notifyDMs           Boolean  @default(true)
+  // Privacy
+  dmFromAnyone         Boolean  @default(true)
+  showReadReceipts     Boolean  @default(true)
+  allowTagging         Boolean  @default(true)
+  whoCanReply         String    @default("everyone") // everyone, following, mentioned
+  locationEnabled     Boolean  @default(false)
+  // Phone (for account settings)
+  phone               String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  userAgent    String?
+  ipAddress    String?
+  device       String?
+  browser      String?
+  os           String?
+  location     String?
+  lastActive   DateTime @default(now())
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model Verification {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  type            String    // blue, gold, gray, government
+  status          String    @default("pending") // pending, approved, rejected
+  verifiedAt      DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Application data
+  businessName    String?   // For gold verification
+  businessWebsite String?   // For gold verification
+  businessCategory String?  // For gold verification
+  documentsUrl    String?   // For gold/government verification
+  officialEmail   String?   // For government verification
+  agencyName      String?   // For government verification
+  notes           String?   // Admin notes
+  rejectionReason String?   // Reason for rejection if rejected
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([status])
+}
+
+// ============================================
+// Tweet Models
+// ============================================
+
+model Tweet {
+  id               String    @id @default(cuid())
+  content          String?
+  authorId         String
+  inReplyToId      String?   // For replies
+  quotedTweetId    String?   // For quote tweets
+  isThread         Boolean   @default(false)
+  threadOrder      Int?
+  retweetOfId      String?   // For retweets (original tweet being retweeted)
+  communityId      String?   // For community posts
+  hasMedia         Boolean   @default(false)
+  sensitiveContent Boolean   @default(false)
+  views            Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  // Relations
+  author          User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  inReplyTo       Tweet?         @relation("TweetReplies", fields: [inReplyToId], references: [id], onDelete: SetNull)
+  replies         Tweet[]        @relation("TweetReplies")
+  quotedTweet     Tweet?         @relation("TweetQuotes", fields: [quotedTweetId], references: [id], onDelete: SetNull)
+  quoteTweets     Tweet[]        @relation("TweetQuotes")
+  retweetOriginal Tweet?         @relation("TweetRetweets", fields: [retweetOfId], references: [id], onDelete: SetNull)
+  retweets        Tweet[]        @relation("TweetRetweets")
+  community       Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  media           TweetMedia[]
+  hashtags        TweetHashtag[]
+  likes           Like[]
+  retweetRecords  Retweet[]
+  bookmarks       Bookmark[]
+  notifications   Notification[]
+
+  @@index([authorId])
+  @@index([inReplyToId])
+  @@index([quotedTweetId])
+  @@index([retweetOfId])
+  @@index([communityId])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model TweetMedia {
+  id           String   @id @default(cuid())
+  tweetId      String
+  type         String   // image, video, gif
+  url          String
+  thumbnailUrl String?
+  width        Int?
+  height       Int?
+  altText      String?
+  order        Int      @default(0)
+
+  // Relations
+  tweet Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@index([tweetId])
+}
+
+// ============================================
+// Hashtag Models
+// ============================================
+
+model Hashtag {
+  id         String        @id @default(cuid())
+  name       String        @unique
+  tweetCount Int           @default(0)
+  trendingAt DateTime?
+  createdAt  DateTime      @default(now())
+
+  // Relations
+  tweets         TweetHashtag[]
+  trendingTopics TrendingTopic[]
+
+  @@index([name])
+  @@index([trendingAt])
+}
+
+model TweetHashtag {
+  id        String   @id @default(cuid())
+  tweetId   String
+  hashtagId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  tweet   Tweet   @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+  hashtag Hashtag @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@unique([tweetId, hashtagId])
+  @@index([tweetId])
+  @@index([hashtagId])
+}
+
+// ============================================
+// Engagement Models
+// ============================================
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  tweetId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tweet Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId])
+  @@index([userId])
+  @@index([tweetId])
+  @@index([createdAt])
+}
+
+model Retweet {
+  id         String   @id @default(cuid())
+  userId     String
+  tweetId    String
+  quoteText  String?  // For quote tweets with additional text
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tweet Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId])
+  @@index([userId])
+  @@index([tweetId])
+  @@index([createdAt])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  tweetId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tweet Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId])
+  @@index([userId])
+  @@index([tweetId])
+  @@index([createdAt])
+}
+
+// ============================================
+// Social Relationship Models
+// ============================================
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  approved    Boolean  @default(true) // For private accounts
+  createdAt   DateTime @default(now())
+
+  // Relations
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([createdAt])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  blocker User @relation("UserBlocked", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("UserBlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+model Mute {
+  id        String   @id @default(cuid())
+  muterId   String
+  mutedId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  muter User @relation("UserMuted", fields: [muterId], references: [id], onDelete: Cascade)
+  muted User @relation("UserMutedBy", fields: [mutedId], references: [id], onDelete: Cascade)
+
+  @@unique([muterId, mutedId])
+  @@index([muterId])
+  @@index([mutedId])
+}
+
+// ============================================
+// Notification Model
+// ============================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // like, retweet, follow, mention, reply, quote
+  userId    String   // Recipient of notification
+  actorId   String   // User who triggered the notification
+  tweetId   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User   @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User   @relation("UserActor", fields: [actorId], references: [id], onDelete: Cascade)
+  tweet Tweet? @relation(fields: [tweetId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([actorId])
+  @@index([tweetId])
+  @@index([createdAt])
+  @@index([read])
+}
+
+// ============================================
+// Direct Message Models
+// ============================================
+
+model Conversation {
+  id             String   @id @default(cuid())
+  participant1Id String
+  participant2Id String
+  lastMessageAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  // Relations
+  participant1 User           @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User           @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages     DirectMessage[]
+
+  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id])
+  @@index([participant2Id])
+  @@index([lastMessageAt])
+}
+
+model DirectMessage {
+  id                  String   @id @default(cuid())
+  senderId            String
+  recipientId         String
+  content             String?
+  conversationId      String
+  hasMedia            Boolean  @default(false)
+  mediaUrl            String?
+  readAt              DateTime?
+  createdAt           DateTime @default(now())
+  deletedForSender    Boolean  @default(false)
+  deletedForRecipient Boolean  @default(false)
+
+  // Relations
+  sender       User          @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient    User          @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  conversation Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+// ============================================
+// List Models
+// ============================================
+
+model List {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner   User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members ListMember[]
+
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+model ListMember {
+  id      String   @id @default(cuid())
+  listId  String
+  userId  String
+  addedAt DateTime @default(now())
+
+  // Relations
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, userId])
+  @@index([listId])
+  @@index([userId])
+}
+
+// ============================================
+// Community Models
+// ============================================
+
+model Community {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  banner      String?
+  icon        String?
+  rules       String?  // JSON string of rules array
+  ownerId     String
+  isPrivate   Boolean  @default(false)
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner   User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members CommunityMember[]
+  tweets  Tweet[]
+
+  @@index([name])
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+model CommunityMember {
+  id           String   @id @default(cuid())
+  communityId  String
+  userId       String
+  role         String   // owner, admin, member
+  joinedAt     DateTime @default(now())
+
+  // Relations
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@index([communityId])
+  @@index([userId])
+}
+
+// ============================================
+// Trending Topic Model
+// ============================================
+
+model TrendingTopic {
+  id          String   @id @default(cuid())
+  hashtagId   String
+  location    String?  // Geographic location for trending
+  tweetVolume Int      @default(0)
+  rank        Int?
+  promotedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  // Relations
+  hashtag Hashtag @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@index([hashtagId])
+  @@index([location])
+  @@index([promotedAt])
+}
+
+// ============================================
+// Admin & Moderation Models
+// ============================================
+
+model Report {
+  id          String    @id @default(cuid())
+  type        String    // tweet, user, message, community
+  reportedId  String    // ID of the reported entity
+  reporterId  String
+  reason      String
+  description String?
+  status      String    @default("pending") // pending, reviewed, resolved, dismissed
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  action      String?   // warning, suspension, ban, dismissed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  reporter     User      @relation("UserReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser User?     @relation("UserReports", fields: [reportedId], references: [id], onDelete: Cascade)
+  reviewer     User?     @relation("UserReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([status])
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([reviewedBy])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // e.g., "user.banned", "tweet.deleted", "report.resolved"
+  targetType String   // user, tweet, community, report
+  targetId   String
+  actorId    String
+  details    String?  // JSON string with additional details
+  createdAt  DateTime @default(now())
+
+  // Relations
+  actor User @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([action])
+  @@index([targetType])
+  @@index([targetId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Suspension {
+  id          String   @id @default(cuid())
+  userId      String
+  reason      String
+  startDate   DateTime @default(now())
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  suspendedBy String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user            User  @relation("UserSuspended", fields: [userId], references: [id], onDelete: Cascade)
+  suspendedByUser User  @relation("UserSuspendedBy", fields: [suspendedBy], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([startDate])
+  @@index([endDate])
+}
