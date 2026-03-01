@@ -40,8 +40,8 @@ export function FeedTabs({ activeTab, onTabChange, isLoading }: FeedTabsProps) {
             {activeTab === "forYou" && (
               <span
                 className={cn(
-                  "absolute -bottom-4 left-1/2 -translate-x-1/2",
-                  "h-1 w-14 rounded-full",
+                  "absolute -bottom-[17px] left-1/2 -translate-x-1/2",
+                  "h-1 w-16 rounded-full",
                   "bg-twitter-blue"
                 )}
               />
@@ -67,8 +67,8 @@ export function FeedTabs({ activeTab, onTabChange, isLoading }: FeedTabsProps) {
             {activeTab === "following" && (
               <span
                 className={cn(
-                  "absolute -bottom-4 left-1/2 -translate-x-1/2",
-                  "h-1 w-14 rounded-full",
+                  "absolute -bottom-[17px] left-1/2 -translate-x-1/2",
+                  "h-1 w-16 rounded-full",
                   "bg-twitter-blue"
                 )}
               />

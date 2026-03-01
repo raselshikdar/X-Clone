@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NotificationBadge, useUnreadCount } from "@/components/notifications/NotificationBadge";
 import { useAuth } from "@/hooks/useAuth";
-import { signOut } from "next-auth";
+import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { Moon, Sun, LogOut } from "lucide-react";
 
@@ -54,6 +54,8 @@ const navItems: NavItem[] = [
   { icon: Mail, label: "Messages", href: "/messages" },
   { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
   { icon: List, label: "Lists", href: "/lists" },
+  { icon: Users, label: "Communities", href: "/communities" },
+  { icon: Crown, label: "Premium", href: "/premium" },
   { icon: User, label: "Profile", href: "/profile" },
 ];
 

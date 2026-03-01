@@ -137,9 +137,9 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
   };
 
   return (
-    <div className="border-b border-twitter-border dark:border-twitter-border-dark">
+    <div className="border-b border-[#2f3336]">
       {/* Banner */}
-      <div className="relative h-[200px] bg-gray-200 dark:bg-gray-800 w-full">
+      <div className="relative h-[200px] bg-[#333639] w-full">
         {profile.banner ? (
           <img
             src={profile.banner}
@@ -147,7 +147,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-twitter-gray dark:bg-twitter-gray-dark" />
+          <div className="w-full h-full bg-[#333639]" />
         )}
       </div>
 
@@ -161,7 +161,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
             alt={profile.displayName || profile.username}
             fallback={profile.displayName || profile.username}
             size="xl"
-            className="ring-4 ring-white dark:ring-black rounded-full"
+            className="ring-4 ring-black rounded-full"
           />
 
           {/* Action Buttons */}
@@ -209,8 +209,8 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
                   className={cn(
                     "rounded-full font-bold min-w-[108px] h-8 px-4",
                     isFollowing
-                      ? "bg-transparent text-black dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-red-50 hover:text-red-500 hover:border-red-500 dark:hover:bg-red-500/10"
-                      : "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                      ? "bg-transparent text-white border border-[#536471] hover:bg-red-500/10 hover:text-red-500 hover:border-red-500"
+                      : "bg-white text-black hover:bg-gray-200"
                   )}
                 >
                   {isFollowing ? "Following" : "Follow"}
@@ -236,7 +236,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
               <VerifiedBadge type="blue" size="md" />
             )}
           </div>
-          <div className="flex items-center gap-1 text-twitter-secondary dark:text-twitter-secondary-dark">
+          <div className="flex items-center gap-1 text-[#71767b]">
             <span>@{profile.username}</span>
             {profile.isPrivate && (
               <Lock className="size-4 ml-1" title="Private account" />
@@ -252,7 +252,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
         )}
 
         {/* Meta Info */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-twitter-secondary dark:text-twitter-secondary-dark text-[15px] mb-3">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[#71767b] text-[15px] mb-3">
           {profile.location && (
             <div className="flex items-center gap-1">
               <MapPin className="size-4" />
@@ -288,10 +288,10 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
             href={`/${profile.username}/following`}
             className="hover:underline"
           >
-            <span className="font-bold">
+            <span className="font-bold text-white">
               {formatNumber(profile.followingCount)}
             </span>{" "}
-            <span className="text-twitter-secondary dark:text-twitter-secondary-dark">
+            <span className="text-[#71767b]">
               Following
             </span>
           </Link>
@@ -299,8 +299,8 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
             href={`/${profile.username}/followers`}
             className="hover:underline"
           >
-            <span className="font-bold">{formatNumber(followersCount)}</span>{" "}
-            <span className="text-twitter-secondary dark:text-twitter-secondary-dark">
+            <span className="font-bold text-white">{formatNumber(followersCount)}</span>{" "}
+            <span className="text-[#71767b]">
               Followers
             </span>
           </Link>
