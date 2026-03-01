@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkModerator, createAuditLog } from '@/lib/admin';
+import { checkModerator, createAuditLog, requireModerator } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export async function GET(
@@ -154,10 +154,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await checkModerator();
-    if (!admin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const admin = await requireModerator();
 
     const { id } = await params;
     const body = await request.json();

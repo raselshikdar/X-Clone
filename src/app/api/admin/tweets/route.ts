@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkModerator, createAuditLog } from '@/lib/admin';
+import { checkModerator, createAuditLog, requireModerator } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -118,10 +118,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const admin = await checkModerator();
-    if (!admin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const admin = await requireModerator();
 
     const { searchParams } = new URL(request.url);
     const tweetId = searchParams.get('id');
