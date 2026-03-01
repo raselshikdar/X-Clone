@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 // GET /api/settings/account - Get account settings
 export async function GET() {

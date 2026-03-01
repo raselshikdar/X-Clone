@@ -121,25 +121,21 @@ export default function ProfilePage() {
   // 404 state
   if (notFound) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black">
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-twitter-border dark:border-twitter-border-dark">
+      <div className="min-h-screen bg-black">
+        <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
           <div className="flex items-center gap-6 p-2">
-            <Link
-              href="/"
-              className="p-2 rounded-full hover:bg-twitter-hover dark:hover:bg-twitter-hover-dark"
-            >
+            <Link href="/" className="p-2 rounded-full hover:bg-white/10 text-white">
               <ArrowLeft className="size-5" />
             </Link>
             <div>
-              <h1 className="text-xl font-bold">Profile</h1>
+              <h1 className="text-xl font-bold text-white">Profile</h1>
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center p-8 mt-16">
-          <div className="text-6xl mb-4">😕</div>
+        <div className="flex flex-col items-center justify-center p-8 mt-16 text-white">
           <h2 className="text-2xl font-bold mb-2">User not found</h2>
-          <p className="text-twitter-secondary dark:text-twitter-secondary-dark">
-            The user @{username} doesn't exist.
+          <p className="text-[#71767b]">
+            The user @{username} doesn&apos;t exist.
           </p>
         </div>
       </div>
@@ -149,31 +145,28 @@ export default function ProfilePage() {
   // Loading state
   if (isLoadingProfile || !profile) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black">
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-twitter-border dark:border-twitter-border-dark">
+      <div className="min-h-screen bg-black">
+        <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
           <div className="flex items-center gap-6 p-2">
-            <Link
-              href="/"
-              className="p-2 rounded-full hover:bg-twitter-hover dark:hover:bg-twitter-hover-dark"
-            >
+            <Link href="/" className="p-2 rounded-full hover:bg-white/10 text-white">
               <ArrowLeft className="size-5" />
             </Link>
             <div>
-              <div className="h-5 w-24 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+              <div className="h-5 w-24 bg-[#2f3336] rounded animate-pulse" />
             </div>
           </div>
         </div>
         <div className="animate-pulse">
-          <div className="h-[200px] bg-gray-200 dark:bg-gray-800" />
+          <div className="h-[200px] bg-[#333639]" />
           <div className="px-4 pb-4">
             <div className="-mt-16 mb-3">
-              <div className="size-32 rounded-full bg-gray-200 dark:bg-gray-800" />
+              <div className="size-32 rounded-full bg-[#2f3336]" />
             </div>
             <div className="space-y-3">
-              <div className="h-6 w-40 bg-gray-200 dark:bg-gray-800 rounded" />
-              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded" />
-              <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded" />
-              <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded" />
+              <div className="h-6 w-40 bg-[#2f3336] rounded" />
+              <div className="h-4 w-24 bg-[#2f3336] rounded" />
+              <div className="h-4 w-full bg-[#2f3336] rounded" />
+              <div className="h-4 w-3/4 bg-[#2f3336] rounded" />
             </div>
           </div>
         </div>
@@ -186,22 +179,19 @@ export default function ProfilePage() {
     profile.isPrivate && !profile.isFollowing && !profile.isOwnProfile;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-twitter-border dark:border-twitter-border-dark">
+      <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
         <div className="flex items-center gap-6 p-2">
-          <Link
-            href="/"
-            className="p-2 rounded-full hover:bg-twitter-hover dark:hover:bg-twitter-hover-dark"
-          >
+          <Link href="/" className="p-2 rounded-full hover:bg-white/10 text-white">
             <ArrowLeft className="size-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-xl font-bold text-white">
               {profile.displayName || profile.username}
             </h1>
-            <p className="text-sm text-twitter-secondary dark:text-twitter-secondary-dark">
-              {profile.tweetsCount} Tweets
+            <p className="text-sm text-[#71767b]">
+              {profile.tweetsCount} posts
             </p>
           </div>
         </div>
@@ -216,11 +206,9 @@ export default function ProfilePage() {
       {/* Private Profile Message */}
       {showPrivateMessage ? (
         <div className="p-4">
-          <div className="flex items-center justify-center gap-2 py-8">
-            <Lock className="size-5 text-twitter-secondary" />
-            <p className="text-twitter-secondary dark:text-twitter-secondary-dark">
-              Follow @{profile.username} to see their tweets.
-            </p>
+          <div className="flex items-center justify-center gap-2 py-8 text-[#71767b]">
+            <Lock className="size-5" />
+            <p>Follow @{profile.username} to see their posts.</p>
           </div>
         </div>
       ) : (
@@ -238,23 +226,21 @@ export default function ProfilePage() {
               <div className="p-4 space-y-4">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex gap-3 animate-pulse">
-                    <div className="size-10 rounded-full bg-gray-200 dark:bg-gray-800" />
+                    <div className="size-10 rounded-full bg-[#2f3336]" />
                     <div className="flex-1">
-                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded mb-2" />
-                      <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded mb-1" />
-                      <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-800 rounded" />
+                      <div className="h-4 w-32 bg-[#2f3336] rounded mb-2" />
+                      <div className="h-3 w-full bg-[#2f3336] rounded mb-1" />
+                      <div className="h-3 w-3/4 bg-[#2f3336] rounded" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : tweets.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-twitter-secondary dark:text-twitter-secondary-dark">
-                  {activeTab === "tweets" && "No tweets yet"}
-                  {activeTab === "replies" && "No replies yet"}
-                  {activeTab === "media" && "No media yet"}
-                  {activeTab === "likes" && "No likes yet"}
-                </p>
+              <div className="p-8 text-center text-[#71767b]">
+                {activeTab === "tweets" && "No posts yet"}
+                {activeTab === "replies" && "No replies yet"}
+                {activeTab === "media" && "No media yet"}
+                {activeTab === "likes" && "No likes yet"}
               </div>
             ) : (
               <>
@@ -265,7 +251,7 @@ export default function ProfilePage() {
                   <button
                     onClick={loadMoreTweets}
                     disabled={isLoadingTweets}
-                    className="w-full p-4 text-twitter-blue hover:bg-twitter-hover dark:hover:bg-twitter-hover-dark transition-colors"
+                    className="w-full p-4 text-[#1d9bf0] hover:bg-white/10 transition-colors"
                   >
                     {isLoadingTweets ? "Loading..." : "Load more"}
                   </button>

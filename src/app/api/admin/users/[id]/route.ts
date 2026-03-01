@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin, createAuditLog, isUserSuspended } from '@/lib/admin';
+import { checkAdmin, createAuditLog, isUserSuspended, requireAdmin } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export async function GET(
@@ -7,10 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await checkAdmin();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await requireAdmin();
 
     const { id } = await params;
 
@@ -117,10 +114,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await checkAdmin();
-    if (!admin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const admin = await requireAdmin();
 
     const { id } = await params;
     const body = await request.json();
@@ -175,10 +169,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await checkAdmin();
-    if (!admin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const admin = await requireAdmin();
 
     const { id } = await params;
 

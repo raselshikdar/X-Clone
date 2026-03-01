@@ -78,7 +78,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-black text-white relative">
       {/* Header with tabs */}
       <NotificationTabs unreadCount={unreadCount} />
 

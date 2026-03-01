@@ -74,3 +74,20 @@ export async function logAudit(params: {
     },
   });
 }
+
+// Alias used by admin route handlers
+export const createAuditLog = logAudit;
+
+export async function isUserSuspended(userId: string): Promise<boolean> {
+  const suspension = await db.userSuspension.findFirst({
+    where: {
+      userId,
+      isActive: true,
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gt: new Date() } },
+      ],
+    },
+  });
+  return suspension !== null;
+}

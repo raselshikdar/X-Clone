@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ImageIcon, Smile, Send, X, Reply, Gif } from "lucide-react";
+import { ImageIcon, Smile, Send, X, Reply, FileImage } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -172,7 +172,7 @@ export function MessageInput({
 
         {/* GIF button */}
         <button className="p-2 rounded-full hover:bg-twitter-blue/10 transition-colors">
-          <Gif className="size-5 text-twitter-blue" />
+          <FileImage className="size-5 text-twitter-blue" />
         </button>
 
         {/* Emoji picker */}

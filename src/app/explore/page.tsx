@@ -11,7 +11,8 @@ import { UserAvatar } from "@/components/common/Avatar";
 
 type ExploreTab = "for-you" | "trending" | "news" | "sports" | "entertainment";
 
-export default function ExplorePage() {
+// Inner component that safely uses useSearchParams — must be wrapped in <Suspense>
+function ExploreContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get("tab") as ExploreTab) || "for-you";
@@ -35,10 +36,9 @@ export default function ExplorePage() {
   ];
 
   return (
-    <MainLayout>
-      {/* Header */}
-      <div className="sticky top-0 bg-black/80 backdrop-blur-md z-20 border-b border-twitter-border-dark">
-        {/* Search bar */}
+    <>
+      {/* Sticky header */}
+      <div className="sticky top-0 bg-black/80 backdrop-blur-md z-20 border-b border-[#2f3336]">
         <div className="px-4 py-3">
           <SearchBar
             placeholder="Search"
@@ -47,28 +47,20 @@ export default function ExplorePage() {
             showRecent={true}
           />
         </div>
-
-        {/* Tabs */}
         <div className="flex overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-1 min-w-[80px] py-4 px-4",
-                "font-bold text-[15px]",
-                "text-center",
-                "transition-colors",
-                "hover:bg-twitter-hover-dark",
-                activeTab === tab.id
-                  ? "text-white"
-                  : "text-gray-500"
+                "flex-1 min-w-[80px] py-4 px-4 font-bold text-[15px] text-center transition-colors hover:bg-white/5",
+                activeTab === tab.id ? "text-white" : "text-[#71767b]"
               )}
             >
               <span className="relative">
                 {tab.label}
                 {activeTab === tab.id && (
-                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full bg-twitter-blue" />
+                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full bg-[#1d9bf0]" />
                 )}
               </span>
             </button>
@@ -76,23 +68,19 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Content based on tab */}
+      {/* Tab content */}
       <div className="pb-4">
         {activeTab === "for-you" && (
           <>
-            {/* Trending section */}
             <TrendingSidebar
               showHeader={true}
               showMore={false}
               limit={10}
               className="rounded-none bg-transparent"
             />
-
-            {/* Who to follow section */}
             <WhoToFollowSection />
           </>
         )}
-
         {activeTab === "trending" && (
           <TrendingSidebar
             showHeader={true}
@@ -101,33 +89,44 @@ export default function ExplorePage() {
             className="rounded-none bg-transparent"
           />
         )}
-
-        {activeTab === "news" && (
-          <CategorySection category="news" title="News" />
-        )}
-
-        {activeTab === "sports" && (
-          <CategorySection category="sports" title="Sports" />
-        )}
-
+        {activeTab === "news" && <CategorySection category="news" title="News" />}
+        {activeTab === "sports" && <CategorySection category="sports" title="Sports" />}
         {activeTab === "entertainment" && (
           <CategorySection category="entertainment" title="Entertainment" />
         )}
       </div>
+    </>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <MainLayout>
+      <React.Suspense
+        fallback={
+          <div className="p-4 space-y-3 animate-pulse">
+            <div className="h-10 rounded-full bg-[#2f3336]" />
+            <div className="h-12 rounded bg-[#2f3336]" />
+          </div>
+        }
+      >
+        <ExploreContent />
+      </React.Suspense>
     </MainLayout>
   );
 }
 
 function WhoToFollowSection() {
-  const [users, setUsers] = React.useState<Array<{
-    id: string;
-    username: string;
-    displayName: string | null;
-    avatar: string | null;
-    verified: boolean;
-    bio: string | null;
-    _count: { followers: number };
-  }>>([]);
+  const [users, setUsers] = React.useState<
+    Array<{
+      id: string;
+      username: string;
+      displayName: string | null;
+      avatar: string | null;
+      verified: boolean;
+      bio: string | null;
+    }>
+  >([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -136,15 +135,14 @@ function WhoToFollowSection() {
         const response = await fetch("/api/search/users?q=&limit=3");
         if (response.ok) {
           const data = await response.json();
-          setUsers(data.users);
+          setUsers(data.users ?? []);
         }
-      } catch (e) {
-        console.error("Failed to fetch users:", e);
+      } catch {
+        // ignore
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchUsers();
   }, []);
 
@@ -157,12 +155,7 @@ function WhoToFollowSection() {
         {users.slice(0, 3).map((user) => (
           <div
             key={user.id}
-            className={cn(
-              "flex items-center justify-between",
-              "px-4 py-3",
-              "hover:bg-twitter-hover-dark",
-              "transition-colors"
-            )}
+            className="flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
           >
             <a
               href={`/${user.username}`}
@@ -178,14 +171,12 @@ function WhoToFollowSection() {
                 <div className="font-bold text-[15px] truncate text-white">
                   {user.displayName || user.username}
                 </div>
-                <div className="text-[13px] text-gray-500 truncate">
+                <div className="text-[13px] text-[#71767b] truncate">
                   @{user.username}
                 </div>
               </div>
             </a>
-            <Button
-              className="bg-white text-black rounded-full font-bold h-8 px-4 text-[15px] hover:bg-gray-200"
-            >
+            <Button className="bg-white text-black rounded-full font-bold h-8 px-4 text-[15px] hover:bg-gray-200">
               Follow
             </Button>
           </div>
@@ -193,7 +184,7 @@ function WhoToFollowSection() {
       </div>
       <a
         href="/explore"
-        className="block px-4 py-3 text-twitter-blue hover:bg-twitter-hover-dark transition-colors"
+        className="block px-4 py-3 text-[#1d9bf0] hover:bg-white/5 transition-colors"
       >
         Show more
       </a>
@@ -201,7 +192,7 @@ function WhoToFollowSection() {
   );
 }
 
-function CategorySection({ category, title }: { category: string; title: string }) {
+function CategorySection({ category: _category, title: _title }: { category: string; title: string }) {
   return (
     <div className="p-4">
       <TrendingSidebar
